@@ -95,7 +95,7 @@ class Window(Toplevel):
     def __init__(self, parent):
         super().__init__(parent)
 
-        self.geometry('295x335')
+        self.geometry('295x345')
         self.title('Calculator')
 
         self.optimal = ''
@@ -159,15 +159,20 @@ class Window(Toplevel):
         self.optimal_label = tk.Label(calc_frame, text='')
         self.optimal_label.grid(column=1, row=0)
 
-        label = tk.Label(calc_frame, text='Bookmaker Win Profit/Loss: ')
+        label = tk.Label(calc_frame, text='Liability: ')
         label.grid(column=0, row=1)
+        self.liability_label = tk.Label(calc_frame, text='')
+        self.liability_label.grid(column=1, row=1)
+
+        label = tk.Label(calc_frame, text='Bookmaker Win Profit/Loss: ')
+        label.grid(column=0, row=2)
         self.back_label = tk.Label(calc_frame, text='')
-        self.back_label.grid(column=1, row=1)
+        self.back_label.grid(column=1, row=2)
 
         label = tk.Label(calc_frame, text='Exchange Win Profit/Loss: ')
-        label.grid(column=0, row=2)
+        label.grid(column=0, row=3)
         self.lay_label = tk.Label(calc_frame, text='')
-        self.lay_label.grid(column=1, row=2)
+        self.lay_label.grid(column=1, row=3)
 
         calc_frame.grid(column=0, row=6, columnspan=2)
 
@@ -177,6 +182,7 @@ class Window(Toplevel):
         back_odds = float(self.back_odds.get())
         lay_odds = float(self.lay_odds.get())
         comm = float(self.commission.get()) / 100
+        liability = stake * (lay_odds - 1)
 
         if bet_type == 'Qualification':
             optimal = back_odds / (lay_odds - comm) * stake
@@ -192,6 +198,7 @@ class Window(Toplevel):
             lay_profit = optimal * (1 - comm)
 
         self.optimal_label['text'] = f'£{optimal:.2f}'
+        self.liability_label['text'] = f'£{liability:.2f}'
         self.back_label['text'] = f'£{back_profit:.2f}'
         self.lay_label['text'] = f'£{lay_profit:.2f}'
 
