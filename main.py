@@ -179,7 +179,7 @@ class Window(Toplevel):
         comm = float(self.commission.get()) / 100
 
         if bet_type == 'Qualification':
-            optimal = round(back_odds / (lay_odds - comm) * stake, 2)
+            optimal = back_odds / (lay_odds - comm) * stake
             back_profit = ((back_odds - 1) * stake) - ((lay_odds - 1) * optimal)
             lay_profit = (optimal * (1 - comm)) - stake
         elif bet_type == 'Free Bet (SNR)':
@@ -191,7 +191,7 @@ class Window(Toplevel):
             back_profit = (back_odds * stake) - ((lay_odds - 1) * optimal)
             lay_profit = optimal * (1 - comm)
 
-        self.optimal_label['text'] = f'£{optimal}'
+        self.optimal_label['text'] = f'£{optimal:.2f}'
         self.back_label['text'] = f'£{back_profit:.2f}'
         self.lay_label['text'] = f'£{lay_profit:.2f}'
 
