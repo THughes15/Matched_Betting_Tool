@@ -1,156 +1,201 @@
-import tkinter as tk
-from tkinter import Frame
-from tkinter import ttk
-from tkinter import messagebox
-from datetime import date
-from openpyxl import load_workbook
-
-
-class Bookie(Frame):
-    def __init__(self, ws):
-        Frame.__init__(self, ws)
-        self.ws = ws
-
-        # Bookmaker Label and Entry
-        self.label = ttk.Label(self, text='Bookmaker:')
-        self.label.pack()
-
-        self.bookie = tk.Entry(self)
-        self.bookie.pack()
-
-
-class Exchange(Frame):
-    def __init__(self, ws):
-        Frame.__init__(self, ws)
-        self.ws = ws
-
-        # Exchange Label and Entry
-        self.label = ttk.Label(self, text='Exchange:')
-        self.label.pack()
-
-        self.exchange = tk.Entry(self)
-        self.exchange.insert('end', 'Smarkets')
-        self.exchange.pack()
-
-
-class Details(Frame):
-    def __init__(self, ws):
-        Frame.__init__(self, ws)
-        self.ws = ws
-
-        # Profit Label and Entry
-        self.label = ttk.Label(self, text='Details:')
-        self.label.pack()
-
-        self.details = tk.Entry(self)
-        self.details.pack()
-
-
-class Profit(Frame):
-    def __init__(self, ws):
-        Frame.__init__(self, ws)
-        self.ws = ws
-
-        # Profit Label and Entry
-        self.label = ttk.Label(self, text='Profit/Loss:')
-        self.label.pack()
-
-        self.profit = tk.Entry(self)
-        self.profit.pack()
-
-
-class Submit(Frame):
-    def __init__(self, ws):
-        Frame.__init__(self, ws)
-        self.ws = ws
-
-        # Submit Button
-        self.button = ttk.Button(self, text='Submit', default='active', padding=5)
-        self.button.pack()
+import os
+from tkinter import Toplevel
+from frames import *
 
 
 class App(tk.Tk):
-    def __init__(self):
-        super().__init__()
+
+    # __init__ function for class tkinterApp
+    def __init__(self, *args, **kwargs):
+        # __init__ function for class Tk
+        tk.Tk.__init__(self, *args, **kwargs)
 
         # Configure the root window
         self.title('Matched Betting Tool')
-        self.geometry('300x180')
+        self.geometry('427x180')
 
-        # Place Bookie Frame
-        self.bookie = Bookie(self)
-        self.bookie.grid(column=0, row=0, padx=10, pady=10)
+        # creating a container
+        container = tk.Frame(self)
+        container.pack(side="top", fill="both", expand=True)
 
-        # Place Exchange Frame
-        self.exchange = Exchange(self)
-        self.exchange.grid(column=1, row=0, padx=10, pady=10)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
 
-        # Place Details Frame
-        self.details = Details(self)
-        self.details.grid(column=0, row=1, padx=10, pady=10)
+        # initializing frames to an empty array
+        self.frames = {}
 
-        # Place Profit Frame
-        self.profit = Profit(self)
-        self.profit.grid(column=1, row=1, padx=10, pady=10)
+        # iterating through a tuple consisting
+        # of the different page layouts
+        for F in (StartPage, Quali):
+            frame = F(container, self)
+            self.frames[F] = frame
+            frame.grid(row=0, column=0, sticky="nsew")
 
-        # Place Button
-        self.button = Submit(self)
-        self.button.button['command'] = self.button_submit
-        self.button.grid(column=0, row=3, columnspan=2, pady=10)
+        self.show_frame(StartPage)
 
-    def button_submit(self):
+    # Display the current frame passed as parameter
+    def show_frame(self, cont):
+        frame = self.frames[cont]
+        frame.tkraise()
 
-        # Read Content From File
-        try:
-            wb = load_workbook(filename="Betting Tool Log.xlsx")
-            ws = wb.active
 
-            row = ws.max_row + 1
-            get_date = date.today()
-            today = get_date.strftime('%d/%m/%y')
+# Home Page Frame
+class StartPage(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
 
-            # Format Date Cell
-            cell = ws.cell(column=2, row=row)
-            cell.number_format = 'dd/mm/yy;@'
-            cell.value = today
+        normal_inputs = Inputs(self)
+        normal_inputs.grid(column=0, row=0, padx=20)
 
-            # Format Bookie Cell
-            cell = ws.cell(column=3, row=row)
-            cell.value = self.bookie.bookie.get()
+        # Menu Buttons
+        menu = Menu(self, controller)
+        menu.grid(column=1, row=0)
 
-            # Format Exchange Cell
-            cell = ws.cell(column=4, row=row)
-            cell.value = self.exchange.exchange.get()
 
-            # Format Details Cell
-            cell = ws.cell(column=5, row=row)
-            cell.value = self.details.details.get()
+class Menu(Frame):
+    def __init__(self, ws, controller):
+        Frame.__init__(self, ws)
+        self.ws = ws
 
-            # Format Profit Cell
-            cell = ws.cell(column=6, row=row)
-            cell.number_format = '£#,##0.00'
-            cell.value = float(self.profit.profit.get())
+        home_button = ttk.Button(self, text="Home Page",
+                                 command=lambda: controller.show_frame(StartPage))
+        home_button.grid(row=0, column=0, padx=10, pady=10)
 
-            wb.save("Betting Tool Log.xlsx")
-            wb.close()
+        quali_button = ttk.Button(self, text="Qualification",
+                                  command=lambda: controller.show_frame(Quali))
+        quali_button.grid(row=1, column=0, padx=10, pady=10)
 
-        except PermissionError:
-            messagebox.showerror('Error', 'Log File Permission Denied!')
-            raise Exception('Log File Permission Denied!')
+        button1 = ttk.Button(self, text="Open Log",
+                             command=lambda: os.startfile('Betting Tool Log.xlsx'))
+        button1.grid(row=2, column=0, padx=10, pady=10)
 
-        self.bookie.bookie.delete(0, 'end')
-        self.exchange.exchange.delete(0, 'end')
-        self.details.details.delete(0, 'end')
-        self.profit.profit.delete(0, 'end')
+        button2 = ttk.Button(self, text="Calculator",
+                             command=lambda: self.open_window())
+        button2.grid(row=3, column=0, padx=10, pady=10)
 
-        messagebox.showinfo(title='Information', message='Success')
+    def open_window(self):
+        window = Window(self)
+        window.grab_set()
+
+
+# Qualification Bet Page Frame
+class Quali(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        options = QualiInputs(self)
+        options.grid(column=0, row=0, padx=20)
+
+        menu = Menu(self, controller)
+        menu.grid(column=1, row=0, sticky='N')
+
+
+# Calculator Window
+class Window(Toplevel):
+    def __init__(self, parent):
+        super().__init__(parent)
+
+        self.geometry('295x335')
+        self.title('Calculator')
+
+        self.optimal = ''
+        self.back_profit = ''
+        self.lay_profit = ''
+
+        # Bet Type Selection
+        type_frame = Frame(self)
+        label = ttk.Label(type_frame, text='Bet Type:')
+        label.grid(column=0, row=0)
+        self.bet_type = ttk.Combobox(type_frame, width=17)
+        self.bet_type['values'] = ('Qualification',
+                                   'Free Bet (SNR)',
+                                   'Free Bet (SR)')
+        self.bet_type.current(0)
+        self.bet_type.grid(column=0, row=1)
+
+        # Back Stake Info
+        frame1 = Frame(self)
+        label = ttk.Label(frame1, text='Back Stake:')
+        label.grid(column=0, row=0)
+        self.stake = ttk.Entry(frame1)
+        self.stake.grid(column=0, row=1)
+
+        # Back Odds Info
+        frame2 = Frame(self)
+        label = ttk.Label(frame2, text='Back Odds:')
+        label.grid(column=0, row=0)
+        self.back_odds = ttk.Entry(frame2)
+        self.back_odds.grid(column=0, row=1)
+
+        # Lay Odds Info
+        frame3 = Frame(self)
+        label = ttk.Label(frame3, text='Lay Odds:')
+        label.grid(column=0, row=0)
+        self.lay_odds = ttk.Entry(frame3)
+        self.lay_odds.grid(column=0, row=1)
+
+        # Lay Commission Info
+        frame4 = Frame(self)
+        label = ttk.Label(frame4, text='Commission (%):')
+        label.grid(column=0, row=0)
+        self.commission = ttk.Entry(frame4)
+        self.commission.insert('end', '0')
+        self.commission.grid(column=0, row=1)
+
+        type_frame.grid(column=0, row=0, columnspan=2, padx=10, pady=10)
+        frame1.grid(column=0, row=1, padx=10, pady=10)
+        frame2.grid(column=1, row=1, padx=10, pady=10)
+        frame3.grid(column=0, row=2, padx=10, pady=10)
+        frame4.grid(column=1, row=2, padx=10, pady=10)
+
+        button = ttk.Button(self, text='Calculate',
+                            command=self.calc,  default='active')
+        button.grid(column=0, row=4, columnspan=2, pady=20, ipady=5, ipadx=5)
+
+        # Frame to display calculations
+        calc_frame = Frame(self)
+        label = tk.Label(calc_frame, text='Optimal Lay Bet: ')
+        label.grid(column=0, row=0)
+        self.optimal_label = tk.Label(calc_frame, text='')
+        self.optimal_label.grid(column=1, row=0)
+
+        label = tk.Label(calc_frame, text='Bookmaker Win Profit/Loss: ')
+        label.grid(column=0, row=1)
+        self.back_label = tk.Label(calc_frame, text='')
+        self.back_label.grid(column=1, row=1)
+
+        label = tk.Label(calc_frame, text='Exchange Win Profit/Loss: ')
+        label.grid(column=0, row=2)
+        self.lay_label = tk.Label(calc_frame, text='')
+        self.lay_label.grid(column=1, row=2)
+
+        calc_frame.grid(column=0, row=6, columnspan=2)
+
+    def calc(self):
+        bet_type = self.bet_type.get()
+        stake = float(self.stake.get())
+        back_odds = float(self.back_odds.get())
+        lay_odds = float(self.lay_odds.get())
+        comm = float(self.commission.get()) / 100
+
+        if bet_type == 'Qualification':
+            optimal = round(back_odds / (lay_odds - comm) * stake, 2)
+            back_profit = ((back_odds - 1) * stake) - ((lay_odds - 1) * optimal)
+            lay_profit = (optimal * (1 - comm)) - stake
+        elif bet_type == 'Free Bet (SNR)':
+            optimal = (back_odds - 1) / (lay_odds - comm) * stake
+            back_profit = ((back_odds - 1) * stake) - ((lay_odds - 1) * optimal)
+            lay_profit = optimal * (1 - comm)
+        else:
+            optimal = back_odds / (lay_odds - comm) * stake
+            back_profit = (back_odds * stake) - ((lay_odds - 1) * optimal)
+            lay_profit = optimal * (1 - comm)
+
+        self.optimal_label['text'] = f'£{optimal}'
+        self.back_label['text'] = f'£{back_profit:.2f}'
+        self.lay_label['text'] = f'£{lay_profit:.2f}'
 
 
 if __name__ == "__main__":
     app = App()
     app.mainloop()
-
-# TODO: Qualification/Normal/Free Views
-# TODO: Enter to hit submit
-# TODO: Message Box Middle of App not screen
-# TODO: Google Tasks Integration
