@@ -49,29 +49,39 @@ class StartPage(tk.Frame):
 
         # Menu Buttons
         menu = Menu(self, controller)
+        menu.home_button['text'] = 'Quali Bet'
+        menu.home_button['command'] = lambda: controller.show_frame(Quali)
         menu.grid(column=1, row=0)
 
 
+# Menu Frame
 class Menu(Frame):
     def __init__(self, ws, controller):
         Frame.__init__(self, ws)
         self.ws = ws
 
-        home_button = ttk.Button(self, text="Home Page",
-                                 command=lambda: controller.show_frame(StartPage))
-        home_button.grid(row=0, column=0, padx=10, pady=10)
+        # home_button = ttk.Button(self, text="Home Page",
+        #                          command=lambda: controller.show_frame(StartPage))
+        # home_button.grid(row=0, column=0, padx=10, pady=10)
+        #
+        # quali_button = ttk.Button(self, text="Qualification",
+        #                           command=lambda: controller.show_frame(Quali))
+        # quali_button.grid(row=1, column=0, padx=10, pady=10)
 
-        quali_button = ttk.Button(self, text="Qualification",
-                                  command=lambda: controller.show_frame(Quali))
-        quali_button.grid(row=1, column=0, padx=10, pady=10)
+        self.home_button = ttk.Button(self)
+        self.home_button.grid(row=0, column=0, padx=10, pady=10)
 
         button1 = ttk.Button(self, text="Open Log",
                              command=lambda: os.startfile('Betting Tool Log.xlsx'))
-        button1.grid(row=2, column=0, padx=10, pady=10)
+        button1.grid(row=1, column=0, padx=10, pady=10)
 
         button2 = ttk.Button(self, text="Calculator",
                              command=lambda: self.open_window())
-        button2.grid(row=3, column=0, padx=10, pady=10)
+        button2.grid(row=2, column=0, padx=10, pady=10)
+
+        button3 = ttk.Button(self, text="Close",
+                             command=controller.destroy)
+        button3.grid(row=3, column=0, padx=10, pady=10)
 
     def open_window(self):
         window = Window(self)
@@ -87,7 +97,9 @@ class Quali(tk.Frame):
         options.grid(column=0, row=0, padx=20)
 
         menu = Menu(self, controller)
-        menu.grid(column=1, row=0, sticky='N')
+        menu.home_button['text'] = 'Home Page'
+        menu.home_button['command'] = lambda: controller.show_frame(StartPage)
+        menu.grid(column=1, row=0)
 
 
 # Calculator Window
