@@ -1,6 +1,12 @@
 import os
 from tkinter import Toplevel
-from frames import *
+import tkinter as tk
+from tkinter import ttk
+from tkinter import Frame
+from tkinter import messagebox
+from tkcalendar import DateEntry
+from datetime import date
+from openpyxl import load_workbook
 
 
 class App(tk.Tk):
@@ -14,7 +20,7 @@ class App(tk.Tk):
         self.title('Matched Betting Tool')
         self.geometry('427x180')
 
-        # creating a container
+        # Creating a Container
         container = tk.Frame(self)
         container.pack(side="top", fill="both", expand=True)
 
@@ -44,7 +50,7 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
-        normal_inputs = Inputs(self)
+        normal_inputs = Inputs(self, 'Normal')
         normal_inputs.grid(column=0, row=0, padx=20)
 
         # Menu Buttons
@@ -54,19 +60,149 @@ class StartPage(tk.Frame):
         menu.grid(column=1, row=0)
 
 
+# Qualification Bet Page Frame
+class Quali(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        options = Inputs(self, 'Quali')
+        options.grid(column=0, row=0, padx=20)
+
+        menu = Menu(self, controller)
+        menu.home_button['text'] = 'Home Page'
+        menu.home_button['command'] = lambda: controller.show_frame(StartPage)
+        menu.grid(column=1, row=0)
+
+
+class Inputs(Frame):
+
+    def __init__(self, parent, page):
+        tk.Frame.__init__(self, parent)
+        self.page = page
+
+        # Create Bookie Frame
+        bookie_frame = Frame(self)
+        label = ttk.Label(bookie_frame, text='Bookmaker:')
+        label.grid(column=0, row=0)
+
+        self.bookie = tk.Entry(bookie_frame)
+        self.bookie.grid(column=0, row=1)
+
+        # Create Exchange Frame
+        exchange_frame = Frame(self)
+        label = ttk.Label(exchange_frame, text='Exchange:')
+        label.grid(column=0, row=0)
+
+        self.exchange = ttk.Combobox(exchange_frame, width=17)
+        self.exchange['values'] = ('Smarkets',
+                                   'Matchbook',
+                                   'Betfair',
+                                   'Betdaq')
+        self.exchange.current(0)
+        self.exchange.grid(column=0, row=1)
+
+        # Place Details Frame
+        details_frame = Frame(self)
+        label = ttk.Label(details_frame, text='Details:')
+        label.grid(column=0, row=0)
+
+        self.details = tk.Entry(details_frame)
+        self.details.grid(column=0, row=1)
+
+        # Create Profit Frame
+        profit_frame = Frame(self)
+        label = ttk.Label(profit_frame, text='Profit/Loss:')
+        label.grid(column=0, row=0)
+
+        self.profit = tk.Entry(profit_frame)
+        self.profit.grid(column=0, row=1)
+
+        # Create Vaild Frame
+        valid_frame = Frame(self)
+        label = ttk.Label(valid_frame, text='Available From:')
+        label.grid(column=0, row=0)
+
+        self.valid = DateEntry(valid_frame, selectmode='day', width=17, locale='en_UK', date_pattern='dd/mm/yy')
+        self.valid.grid(column=0, row=1)
+
+        # Create Submit Frame
+        submit_frame = Frame(self)
+        self.button = ttk.Button(submit_frame, text='Submit', default='active', padding=5)
+        self.button['command'] = self.button_submit
+        self.button.grid(column=0, row=2)
+
+        # Place Frames
+        bookie_frame.grid(column=0, row=0, pady=10, padx=10)
+        exchange_frame.grid(column=1, row=0, pady=10, padx=10)
+        details_frame.grid(column=0, row=1, pady=10, padx=10)
+        profit_frame.grid(column=1, row=1, pady=10, padx=10)
+
+        if self.page == 'Quali':
+            valid_frame.grid(column=0, row=2, padx=10, pady=10)
+            submit_frame.grid(column=1, row=2, pady=10, padx=10)
+        else:
+            submit_frame.grid(column=0, row=2, pady=10, padx=10, columnspan=2)
+
+    def button_submit(self):
+
+        # Read Content From File
+        try:
+            wb = load_workbook(filename="Betting Tool Log.xlsx")
+            if self.page == 'Quali':
+                ws = wb['Quali']
+            else:
+                ws = wb['Normal']
+
+            row = ws.max_row + 1
+            get_date = date.today()
+            today = get_date.strftime('%d/%m/%y')
+
+            # Format Date Cell
+            cell = ws.cell(column=2, row=row)
+            cell.number_format = 'dd/mm/yy;@'
+            cell.value = today
+
+            # Format Bookie Cell
+            cell = ws.cell(column=3, row=row)
+            cell.value = self.bookie.get()
+
+            # Format Exchange Cell
+            cell = ws.cell(column=4, row=row)
+            cell.value = self.exchange.get()
+
+            # Format Details Cell
+            cell = ws.cell(column=5, row=row)
+            cell.value = self.details.get()
+
+            # Format Profit Cell
+            cell = ws.cell(column=6, row=row)
+            cell.number_format = '£#,##0.00'
+            cell.value = float(self.profit.get())
+
+            # Format Valid Cell
+            if self.page == 'Quali':
+                cell = ws.cell(column=7, row=row)
+                cell.value = self.valid.get()
+
+            wb.save("Betting Tool Log.xlsx")
+            wb.close()
+
+        except PermissionError:
+            messagebox.showerror('Error', 'Log File Permission Denied!')
+            raise Exception('Log File Permission Denied!')
+
+        self.bookie.delete(0, 'end')
+        self.details.delete(0, 'end')
+        self.profit.delete(0, 'end')
+
+        messagebox.showinfo(title='Information', message='Success')
+
+
 # Menu Frame
 class Menu(Frame):
     def __init__(self, ws, controller):
         Frame.__init__(self, ws)
         self.ws = ws
-
-        # home_button = ttk.Button(self, text="Home Page",
-        #                          command=lambda: controller.show_frame(StartPage))
-        # home_button.grid(row=0, column=0, padx=10, pady=10)
-        #
-        # quali_button = ttk.Button(self, text="Qualification",
-        #                           command=lambda: controller.show_frame(Quali))
-        # quali_button.grid(row=1, column=0, padx=10, pady=10)
 
         self.home_button = ttk.Button(self)
         self.home_button.grid(row=0, column=0, padx=10, pady=10)
@@ -86,20 +222,6 @@ class Menu(Frame):
     def open_window(self):
         window = Window(self)
         window.grab_set()
-
-
-# Qualification Bet Page Frame
-class Quali(tk.Frame):
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent)
-
-        options = QualiInputs(self)
-        options.grid(column=0, row=0, padx=20)
-
-        menu = Menu(self, controller)
-        menu.home_button['text'] = 'Home Page'
-        menu.home_button['command'] = lambda: controller.show_frame(StartPage)
-        menu.grid(column=1, row=0)
 
 
 # Calculator Window
