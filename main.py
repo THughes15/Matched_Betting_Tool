@@ -29,9 +29,6 @@ class App(tk.Tk):
 
         # initializing frames to an empty array
         self.frames = {}
-
-        # iterating through a tuple consisting
-        # of the different page layouts
         for F in (StartPage, Quali):
             frame = F(container, self)
             self.frames[F] = frame
@@ -117,7 +114,7 @@ class Inputs(Frame):
         self.profit = tk.Entry(profit_frame)
         self.profit.grid(column=0, row=1)
 
-        # Create Vaild Frame
+        # Create Valid Frame
         valid_frame = Frame(self)
         label = ttk.Label(valid_frame, text='Available From:')
         label.grid(column=0, row=0)
@@ -286,29 +283,29 @@ class Window(Toplevel):
                             command=self.calc,  default='active')
         button.grid(column=0, row=4, columnspan=2, pady=20, ipady=5, ipadx=5)
 
+        # Calculations Frames
+        bottom_frame = Frame(self)
         # Frame to display calculations
-        calc_frame = Frame(self)
-        label = tk.Label(calc_frame, text='Optimal Lay Bet: ')
-        label.grid(column=0, row=0)
+        label_frame = Frame(bottom_frame)
+        tk.Label(label_frame, text='Optimal Lay Bet: ').grid(column=0, row=0, sticky='E')
+        tk.Label(label_frame, text='Liability: ').grid(column=0, row=1, sticky='E')
+        tk.Label(label_frame, text='Bookmaker Win Profit/Loss: ').grid(column=0, row=2, sticky='E')
+        tk.Label(label_frame, text='Exchange Win Profit/Loss: ').grid(column=0, row=3, sticky='E')
+
+        # Display Calcs Frame
+        calc_frame = Frame(bottom_frame)
         self.optimal_label = tk.Label(calc_frame, text='')
-        self.optimal_label.grid(column=1, row=0)
-
-        label = tk.Label(calc_frame, text='Liability: ')
-        label.grid(column=0, row=1)
+        self.optimal_label.grid(column=0, row=0)
         self.liability_label = tk.Label(calc_frame, text='')
-        self.liability_label.grid(column=1, row=1)
-
-        label = tk.Label(calc_frame, text='Bookmaker Win Profit/Loss: ')
-        label.grid(column=0, row=2)
+        self.liability_label.grid(column=0, row=1)
         self.back_label = tk.Label(calc_frame, text='')
-        self.back_label.grid(column=1, row=2)
-
-        label = tk.Label(calc_frame, text='Exchange Win Profit/Loss: ')
-        label.grid(column=0, row=3)
+        self.back_label.grid(column=0, row=2)
         self.lay_label = tk.Label(calc_frame, text='')
-        self.lay_label.grid(column=1, row=3)
+        self.lay_label.grid(column=0, row=3)
 
-        calc_frame.grid(column=0, row=6, columnspan=2)
+        label_frame.grid(column=0, row=0, sticky='W')
+        calc_frame.grid(column=1, row=0, sticky='E')
+        bottom_frame.grid(column=0, row=6, columnspan=2, sticky='W')
 
     def calc(self):
         bet_type = self.bet_type.get()
