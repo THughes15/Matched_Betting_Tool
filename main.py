@@ -201,10 +201,11 @@ class Inputs(Frame):
                 cell.value = self.valid.get()
 
                 # Add to Google Tasks
+                info = f'{self.bookie.get()}: {self.details.get()}'
                 self.valid.configure(date_pattern='Y-mm-dd')
                 due_date = self.valid.get() + 'T00:00:00.000Z'
                 self.valid.configure(date_pattern='dd/mm/yy')
-                tasks.add_task(self.details.get(), due_date)
+                tasks.add_task(info, due_date)
 
             wb.save("Betting Tool Log.xlsx")
             wb.close()
@@ -367,6 +368,5 @@ if __name__ == "__main__":
     app.mainloop()
 
 # TODO: Free Bets to use Page
-# TODO: Google Tasks Integration (Settings Enable Google Tasks)
-# TODO: Odds API
+# TODO: Settings Page with Google Tasks Toggle
 # TODO: Excel To Google Sheets
