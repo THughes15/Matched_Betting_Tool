@@ -1,4 +1,7 @@
 import os
+
+import tasks
+from tasks import *
 from tkinter import Toplevel
 import tkinter as tk
 from tkinter import ttk
@@ -34,7 +37,23 @@ class App(tk.Tk):
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(StartPage)
+        # Check if Google Tasks is Setup
+        if os.path.exists('config.txt'):
+            if os.path.exists('token.json'):
+                tasks.initial()
+            self.show_frame(StartPage)
+        else:
+            check = messagebox.askyesno('Google Tasks', 'Would you like to Integrate Google Tasks?')
+            if check:
+                f = open("config.txt", "a")
+                f.write("Google Tasks: True")
+                f.close()
+
+                tasks.initial()
+            else:
+                f = open("config.txt", "a")
+                f.write("Google Tasks: False")
+                f.close()
 
     # Display the current frame passed as parameter
     def show_frame(self, cont):
@@ -180,6 +199,12 @@ class Inputs(Frame):
             if self.page == 'Quali':
                 cell = ws.cell(column=7, row=row)
                 cell.value = self.valid.get()
+
+                # Add to Google Tasks
+                self.valid.configure(date_pattern='Y-mm-dd')
+                due_date = self.valid.get() + 'T00:00:00.000Z'
+                self.valid.configure(date_pattern='dd/mm/yy')
+                tasks.add_task(self.details.get(), due_date)
 
             wb.save("Betting Tool Log.xlsx")
             wb.close()
@@ -340,3 +365,8 @@ class Window(Toplevel):
 if __name__ == "__main__":
     app = App()
     app.mainloop()
+
+# TODO: Free Bets to use Page
+# TODO: Google Tasks Integration (Settings Enable Google Tasks)
+# TODO: Odds API
+# TODO: Excel To Google Sheets
