@@ -32,7 +32,7 @@ class App(tk.Tk):
 
         # initializing frames to an empty array
         self.frames = {}
-        for F in (StartPage, Quali):
+        for F in (StartPage, Quali, Free):
             frame = F(container, self)
             self.frames[F] = frame
             frame.grid(row=0, column=0, sticky="nsew")
@@ -67,13 +67,13 @@ class StartPage(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         normal_inputs = Inputs(self, 'Normal')
-        normal_inputs.grid(column=0, row=0, padx=20)
+        normal_inputs.grid(column=1, row=0, padx=20)
 
         # Menu Buttons
         menu = Menu(self, controller)
         menu.home_button['text'] = 'Quali Bet'
         menu.home_button['command'] = lambda: controller.show_frame(Quali)
-        menu.grid(column=1, row=0)
+        menu.grid(column=0, row=0)
 
 
 # Qualification Bet Page Frame
@@ -82,12 +82,23 @@ class Quali(tk.Frame):
         tk.Frame.__init__(self, parent)
 
         options = Inputs(self, 'Quali')
-        options.grid(column=0, row=0, padx=20)
+        options.grid(column=1, row=0, padx=20)
 
         menu = Menu(self, controller)
         menu.home_button['text'] = 'Home Page'
         menu.home_button['command'] = lambda: controller.show_frame(StartPage)
-        menu.grid(column=1, row=0)
+        menu.grid(column=0, row=0)
+
+
+# Qualification Bet Page Frame
+class Free(tk.Frame):
+    def __init__(self, parent, controller):
+        tk.Frame.__init__(self, parent)
+
+        menu = Menu(self, controller)
+        menu.home_button['text'] = 'Home Page'
+        menu.home_button['command'] = lambda: controller.show_frame(StartPage)
+        menu.grid(column=0, row=0)
 
 
 class Inputs(Frame):
@@ -228,19 +239,23 @@ class Menu(Frame):
         self.ws = ws
 
         self.home_button = ttk.Button(self)
-        self.home_button.grid(row=0, column=0, padx=10, pady=10)
+        self.home_button.grid(row=0, column=0, padx=10, pady=5)
 
         button1 = ttk.Button(self, text="Open Log",
                              command=lambda: os.startfile('Betting Tool Log.xlsx'))
-        button1.grid(row=1, column=0, padx=10, pady=10)
+        button1.grid(row=1, column=0, padx=10, pady=5)
 
         button2 = ttk.Button(self, text="Calculator",
                              command=lambda: self.open_window())
-        button2.grid(row=2, column=0, padx=10, pady=10)
+        button2.grid(row=2, column=0, padx=10, pady=5)
 
-        button3 = ttk.Button(self, text="Close",
+        button3 = ttk.Button(self, text="Free Bets",
+                             command=lambda: controller.show_frame(Free))
+        button3.grid(row=3, column=0, padx=10, pady=5)
+
+        button4 = ttk.Button(self, text="Close",
                              command=controller.destroy)
-        button3.grid(row=3, column=0, padx=10, pady=10)
+        button4.grid(row=4, column=0, padx=10, pady=5)
 
     def open_window(self):
         window = Window(self)
