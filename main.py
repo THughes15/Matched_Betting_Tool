@@ -306,7 +306,7 @@ class Window(Toplevel):
 
         # Back Stake Info
         frame1 = Frame(self)
-        label = ttk.Label(frame1, text='Back Stake:')
+        label = ttk.Label(frame1, text='Back Stake (£):')
         label.grid(column=0, row=0)
         self.stake = ttk.Entry(frame1)
         self.stake.grid(column=0, row=1)
@@ -412,7 +412,6 @@ if __name__ == "__main__":
     app = App()
     app.mainloop()
 
-# TODO: Free Bets to use Page
 # TODO: Settings Page with Google Tasks Toggle
 # TODO: Excel To Google Sheets
-# TODO: Add Copy button for Lay Bet
+# TODO: Free Bets Dates
