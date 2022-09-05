@@ -84,5 +84,21 @@ def add_task(info, due):
         print(err)
 
 
+def get_bets():
+    creds = Credentials.from_authorized_user_file('token.json', SCOPES)
+    service = build('tasks', 'v1', credentials=creds)
+
+    try:
+        # Add Task
+        results = service.tasks().list(
+            tasklist=tasklist_id
+        ).execute()
+        items = results.get('items', [])
+        return items
+
+    except HttpError as err:
+        print(err)
+
+
 if __name__ == '__main__':
     initial()

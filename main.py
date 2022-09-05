@@ -1,6 +1,7 @@
 import os
 
 import tasks
+from pyperclip import copy
 from tasks import *
 from tkinter import Toplevel
 import tkinter as tk
@@ -95,10 +96,30 @@ class Free(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent)
 
+        # Create Free Bets Frame
+        bets_frame = Frame(self)
+        label = tk.Text(bets_frame, width=35, height=7, font=("Helvetica", 12))
+        label.grid(column=0, row=0)
+        bets_frame.grid(column=1, row=0)
+
+        # Create Submit Frame
+        submit_frame = Frame(self)
+        self.button = ttk.Button(submit_frame, text='Refresh', default='active', padding=5)
+        self.button['command'] = lambda: insert_bets()
+        self.button.grid(column=0, row=0)
+        submit_frame.grid(column=1, row=1)
+
         menu = Menu(self, controller)
         menu.home_button['text'] = 'Home Page'
         menu.home_button['command'] = lambda: controller.show_frame(StartPage)
-        menu.grid(column=0, row=0)
+        menu.grid(column=0, row=0, rowspan=2)
+
+        def insert_bets():
+            label.delete(1.0, 'end')
+            results = tasks.get_bets()
+            for r in results:
+                print(r)
+                label.insert('end', f'{r["title"]}\n')
 
 
 class Inputs(Frame):
@@ -270,9 +291,7 @@ class Window(Toplevel):
         self.geometry('295x345')
         self.title('Calculator')
 
-        self.optimal = ''
-        self.back_profit = ''
-        self.lay_profit = ''
+        self.optimal = 0
 
         # Bet Type Selection
         type_frame = Frame(self)
@@ -320,9 +339,15 @@ class Window(Toplevel):
         frame3.grid(column=0, row=2, padx=10, pady=10)
         frame4.grid(column=1, row=2, padx=10, pady=10)
 
+        # Calculate Button
         button = ttk.Button(self, text='Calculate',
                             command=self.calc,  default='active')
-        button.grid(column=0, row=4, columnspan=2, pady=20, ipady=5, ipadx=5)
+        button.grid(column=0, row=4, pady=20, ipady=5, ipadx=5)
+
+        # Copy Button
+        button = ttk.Button(self, text='Copy Lay Bet',
+                            command=self.copy_lay, default='active')
+        button.grid(column=1, row=4,  pady=20, ipady=5, ipadx=5)
 
         # Calculations Frames
         bottom_frame = Frame(self)
@@ -348,6 +373,9 @@ class Window(Toplevel):
         calc_frame.grid(column=1, row=0, sticky='E')
         bottom_frame.grid(column=0, row=6, columnspan=2, sticky='W')
 
+    def copy_lay(self):
+        copy(self.optimal)
+
     def calc(self):
         bet_type = self.bet_type.get()
         stake = float(self.stake.get())
@@ -372,6 +400,8 @@ class Window(Toplevel):
             lay_profit = optimal * (1 - comm)
             liability = optimal * (lay_odds - 1)
 
+        self.optimal = optimal
+
         self.optimal_label['text'] = f'£{optimal:.2f}'
         self.liability_label['text'] = f'£{liability:.2f}'
         self.back_label['text'] = f'£{back_profit:.2f}'
@@ -385,3 +415,4 @@ if __name__ == "__main__":
 # TODO: Free Bets to use Page
 # TODO: Settings Page with Google Tasks Toggle
 # TODO: Excel To Google Sheets
+# TODO: Add Copy button for Lay Bet
